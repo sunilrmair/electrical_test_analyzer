@@ -11,6 +11,18 @@ from electrical_test_analyzer.helper_functions import get_title_and_units
 
 
 def pd_filetype_agnostic_read(filepath, **kwargs):
+    """Reads a file into a pandas DataFrame, handling multiple file formats.
+
+    Args:
+        filepath (str | Pathlike): Path to the file
+        **kwargs: Additional arguments passed to `pd.concat`.
+
+    Raises:
+        ValueError: If the file extension is unsupported.
+
+    Returns:
+        pandas.DataFrame: The loaded data.
+    """
 
     ext = filepath.split('.')[-1].lower()
     
@@ -38,6 +50,17 @@ def pd_filetype_agnostic_read(filepath, **kwargs):
 
 
 def df_to_column_value_sequences(df, column, sequence):
+    """Finds sequences of consecutive column values in a DataFrame that match a given sequence.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame.
+        column (str): The column to search for the sequence.
+        sequence (list): The sequence of values to match.
+
+    Returns:
+        list[list[pandas.DataFrame]]: A list of lists of DataFrames, where each inner list contains consecutive DataFrame groups that match the given sequence.
+    """
+
 
     sequence_length = len(sequence)
     sequence = np.asarray(sequence)
@@ -56,6 +79,15 @@ def df_to_column_value_sequences(df, column, sequence):
 
 
 def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, **kwargs):
+    """Concatenates a list of DataFrames while adjusting specified columns to continue smoothly.
+
+    Args:
+        dfs (list[pd.DataFrame]): List of DataFrames to concatenate.
+        continuing_columns (list[str], optional): Columns that should have their values adjusted to continue smoothly. Defaults to None.
+
+    Returns:
+        pandas.DataFrame: The concatenated DataFrame with adjusted continuing columns.
+    """
 
     continuing_columns = continuing_columns or []
     default_kwargs = dict(ignore_index=True)
@@ -95,53 +127,62 @@ def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, **kwar
 
 
 def naive_df_area_normalization(df, active_area='Active area (cm2)', **kwargs):
-        """Processes DataFrame columns by scaling specific columns based on an active area.
+    """Processes DataFrame columns by scaling specific columns based on an active area.
 
-        Args:
-            df (pandas.DataFrame): The DataFrame with columns to scale
-            active_area_key (str | float | int, optional): The column name representing the active area in cm2 or a number representing the active area in cm2. Defaults to 'Active area (cm2)'.
+    Args:
+        df (pandas.DataFrame): The DataFrame with columns to scale
+        active_area_key (str | float | int, optional): The column name representing the active area in cm2 or a number representing the active area in cm2. Defaults to 'Active area (cm2)'.
 
-        Returns:
-            pandas.DataFrame : The DataFrame with additional scaled columns.
-        """
-
-
-        if isinstance(active_area, str):
-            active_area = df[active_area]
+    Returns:
+        pandas.DataFrame : The DataFrame with additional scaled columns.
+    """
 
 
-        divide_by_area_units = [
-            'mAh',
-            'mA',
-            'mW',
-            'mWh',
-            'Wh',
-            'F'
-        ]
+    if isinstance(active_area, str):
+        active_area = df[active_area]
 
-        multiply_by_area_units = [
-            'Ohm'
-        ]
 
-        for column in df.columns:
-            
-            if any('(' + substring + ')' in column for substring in divide_by_area_units):
-                title, units = get_title_and_units(column)
-                if title + ' (' + units + '/cm2)' not in df.columns:
-                    df[title + ' (' + units + '/cm2)'] = df[column] / active_area
-            
-            if any('(' + substring + ')' in column for substring in multiply_by_area_units):
-                title, units = get_title_and_units(column)
-                if title + ' (' + units + '-cm2)' not in df.columns:
-                    df[title + ' (' + units + '-cm2)'] = df[column] * active_area
-            
-        return df
+    divide_by_area_units = [
+        'mAh',
+        'mA',
+        'mW',
+        'mWh',
+        'Wh',
+        'F'
+    ]
+
+    multiply_by_area_units = [
+        'Ohm'
+    ]
+
+    for column in df.columns:
+        
+        if any('(' + substring + ')' in column for substring in divide_by_area_units):
+            title, units = get_title_and_units(column)
+            if title + ' (' + units + '/cm2)' not in df.columns:
+                df[title + ' (' + units + '/cm2)'] = df[column] / active_area
+        
+        if any('(' + substring + ')' in column for substring in multiply_by_area_units):
+            title, units = get_title_and_units(column)
+            if title + ' (' + units + '-cm2)' not in df.columns:
+                df[title + ' (' + units + '-cm2)'] = df[column] * active_area
+        
+    return df
 
 
 
 
 
 def df_to_common_row(df):
+    """Extracts a single row containing values from columns that have the same value across all rows.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame.
+
+    Returns:
+        pandas.Series: A Series containing the common values from columns where all rows have the same value.
+    """
+
     same_value_columns = df.columns[df.nunique() == 1]
     return df[same_value_columns].iloc[0]
 
@@ -149,11 +190,21 @@ def df_to_common_row(df):
 
 
 
-
 class FilterSet:
+    """Contains filters to be applied to a pandas DataFrame."""
 
 
     def __init__(self, query_filters=None, isin_filters=None, not_in_filters=None, between_filters=None, lambda_filters=None, null_check_filters=None):
+        """Initializes FilterSet with specified filters.
+
+        Args:
+            query_filters (list[str], optional): List of query strings to be applied via `df.query()`. Defaults to None.
+            isin_filters (dict, optional): Dictionary where keys are column names and values are lists of values to accept for the specified column. Defaults to None.
+            not_in_filters (dict, optional): Dictionary where keys are column names and values are lists of values to reject for the specified column. Defaults to None.
+            between_filters (dict, optional): Dictionary where keys are column names and values are tuples containing lower and upper bounds for the specified column. Defaults to None.
+            lambda_filters (list[callable], optional): List of functions that take the DataFrame as the input and and give a boolean mask over the rows as an output. Defaults to None.
+            null_check_filters (dict, optional): Dictionary where keys are column names and values are boolean False if null values are to be rejected and True if null values are to be accepted. Defaults to None.
+        """
 
         self.query_filters = query_filters or []
         self.isin_filters = isin_filters or {}
@@ -164,30 +215,73 @@ class FilterSet:
 
 
     def add_query(self, query_str):
+        """Adds a query filter.
+
+        Args:
+            query_str (str): The query string to add.
+        """
         self.query_filters.append(query_str)
 
 
     def add_isin(self, column, values):
+        """Adds an 'is in' filter.
+
+        Args:
+            column (str): The column name to filter by.
+            values (list): The list of values to accept.
+        """
         self.isin_filters[column] = values
 
 
     def add_not_in(self, column, values):
+        """Adds a 'not in' filter.
+
+        Args:
+            column (str): The column name to filter by.
+            values (list): The list of rejected values.
+        """
         self.not_in_filters[column] = values
 
 
     def add_between(self, column, low, high):
+        """Adds a 'between' filter.
+
+        Args:
+            column (str): The column name to filter by.
+            low (float | int | str): The lower bound.
+            high (float | int | str): The upper bound.
+        """
         self.between_filters[column] = (low, high)
 
 
     def add_lambda(self, condition_func):
+        """Adds a function filter.
+
+        Args:
+            condition_func (callable): A function that takes a DataFrame as the input and and gives a boolean mask over the rows as an output.
+        """
         self.lambda_filters.append(condition_func)
 
 
     def add_null_check(self, column, is_null=False):
+        """Adds a null check.
+
+        Args:
+            column (str): The column name to filter by.
+            is_null (bool, optional): Denotes whether to reject (False) or accept (True) null values. Defaults to False.
+        """
         self.null_check_filters[column] = is_null
 
 
     def apply(self, df):
+        """Applies the filters to a DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The DataFrame to which the filters are applied.
+
+        Returns:
+            DataFrame: The filtered DataFrame.
+        """
 
         # Apply query filters
         for query_str in self.query_filters:

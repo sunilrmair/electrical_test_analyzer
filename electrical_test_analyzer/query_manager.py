@@ -11,7 +11,7 @@ from electrical_test_analyzer.helper_functions import ensure_iterable
 
 
 class QueryManager:
-
+    """Manages query operations for experimental data files, including filtering and searching."""
 
 
     valid_filetypes = [
@@ -21,6 +21,12 @@ class QueryManager:
 
 
     def __init__(self, cell_parameters_db_filepath, test_parameters_db_filepath):
+        """Initializes QueryManager by loading and merging test and cell parameters into `parameters_df`.
+
+        Args:
+            cell_parameters_db_filepath (str | list[str]): File path(s) to the cell parameters database.
+            test_parameters_db_filepath (str | list[str]): File path(s) to the test parameters database.
+        """
 
         cell_parameters_df = pd.concat([pd_filetype_agnostic_read(filepath) for filepath in ensure_iterable(cell_parameters_db_filepath)])
         test_parameters_df = pd.concat([pd_filetype_agnostic_read(filepath) for filepath in ensure_iterable(test_parameters_db_filepath)])
@@ -33,16 +39,27 @@ class QueryManager:
 
     @property
     def num_tests(self):
+        """Returns the number of tests in the dataset.
+
+        Returns:
+            int: Number of tests in `parameters_df`.
+        """
         return len(self.parameters_df)
     
 
 
     def add_filterset(self, filterset):
+        """Adds one or more filtersets to be applied later.
+
+        Args:
+            filterset (FilterSet | list[FilterSet]): A single filterset or a list of filtersets to add.
+        """
         self.filtersets.extend(ensure_iterable(filterset))
 
 
 
     def apply_filtersets(self):
+        """Applies all added filtersets to filter `parameters_df`. If no filtersets are present, a warning is issued."""
 
         if self.filtersets:
             self.parameters_df = pd.concat([filterset.apply(self.parameters_df) for filterset in self.filtersets]).drop_duplicates()
@@ -54,6 +71,14 @@ class QueryManager:
 
     
     def search(self, root_directory):
+        """Searches for files matching dataset entries within the specified root directory.
+
+        Args:
+            root_directory (str | Pathlike | list[str | Pathlike]): Root directory or directories to search in.
+
+        Returns:
+            pandas.DataFrame: A copy of `parameters_df` with an additional 'filepath' column.
+        """
 
         results_df = self.parameters_df.copy(deep=True)
         results_df['filepath'] = ''

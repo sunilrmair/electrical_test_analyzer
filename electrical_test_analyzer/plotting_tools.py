@@ -37,27 +37,29 @@ def plot_df(
         y_key (str): The name of the column containing the data to plot along the y axis.
         x_func (Callable[pandas.Series, Sequence, optional): A function to transform the x data. Defaults to identity function lambda x : x.
         y_func (Callable[pandas.Series, Sequence, optional): A function to transform the y data. Defaults to identity function lambda y : y.
-        group_by (list[str], str, optional): _description_. Defaults to None.
-        color_by (str, optional): _description_. Defaults to None.
-        cmap (_type_, optional): _description_. Defaults to None.
-        linestyle_by (str, optional): _description_. Defaults to None.
-        linestyle_cycle (_type_, optional): _description_. Defaults to None.
-        marker_by (str, optional): _description_. Defaults to None.
-        marker_cycle (_type_, optional): _description_. Defaults to None.
-        label_by (str, optional): _description_. Defaults to None.
-        split_yaxis_by (str, optional): _description_. Defaults to None.
-        split_xaxis_by (str, optional): _description_. Defaults to None.
-        ax (matplotlib.axes.Axes, optional): _description_. Defaults to None.
-        subplots_kw (dict, optional): _description_. Defaults to None.
-        scale_axes (bool, optional): _description_. Defaults to True.
-        plot_kw (dict, optional): _description_. Defaults to None.
-        split_yaxis_text_xy (tuple, optional): _description_. Defaults to (1.0, 0.5).
-        split_yaxis_text_kwargs (dict, optional): _description_. Defaults to None.
-        split_xaxis_text_xy (tuple, optional): _description_. Defaults to (0.5, 1.0).
-        split_xaxis_text_kwargs (dict, optional): _description_. Defaults to None.
+        group_by (list[str], str, optional): The name of the column(s) by which the data is split. Defaults to None.
+        color_by (str, optional): The name of the column by which colors are assigned to the plot. Defaults to None.
+        cmap (matplotlib.colors.Colormap | list[tuple[float, float, float, float]], optional): A description of colors to be used. If None, a default value is used internally.
+        linestyle_by (str, optional): The name of the column by which linestyles are assigned to the plot. Defaults to None.
+        linestyle_cycle (list[str], optional): A description of the linestyles to be used. If None, a default value is used internally.
+        marker_by (str, optional): The name of the column by which markers are assigned to the plot. Defaults to None.
+        marker_cycle (list[str], optional): A descripton of the markers to be used. If None, a default value is used internally.
+        label_by (str, optional): The name of the column by which labels are assigned. Defaults to None.
+        split_yaxis_by (str, optional): The name of the columns by which the data is split into separate axes, stacked vertically. Defaults to None.
+        split_xaxis_by (str, optional): The name of the columns by which the data is split into separate axes, stacked horizontally. Defaults to None.
+        ax (matplotlib.axes.Axes, optional): The Axes on which to plot. Ignored if split_yaxis_by or split_xaxis_by are provided. Defaults to None.
+        subplots_kw (dict, optional): Keyword arguments for matplotlib.pyplot.subplots call used to create the axes. Ignored if ax is used. Defaults to None.
+        scale_axes (bool, optional): If true, the figure size is scaled by the numbers of rows and columns in the subplot. Defaults to True.
+        plot_kw (dict, optional): Keyword arguments for plotting data, overwritten by column based plotting style. Defaults to None.
+        split_yaxis_text_xy (tuple, optional): Coordinates for labeling split y axes in units of fractional axes. Defaults to (1.0, 0.5).
+        split_yaxis_text_kwargs (dict, optional): Keyword arguments for text labeling split y axes. Defaults to None.
+        split_xaxis_text_xy (tuple, optional): Coordinates for labeling split x axes in units of fractional axes. Defaults to (0.5, 1.0).
+        split_xaxis_text_kwargs (dict, optional): Keyword arguments for text labeling split x axes. Defaults to None.
 
     Returns:
-        _type_: _description_
+        tuple[matplotlib.figure, matplotlib.axes.Axes | numpy.ndarray[matplotlib.axes.Axes]]: A tuple containing:
+            fig (matplotlib.figure): The figure.
+            ax (matplotlib.axes.Axes | numpy.ndarray[matplotlib.axes.Axes]): The axes.
     """
     
 
@@ -82,7 +84,6 @@ def plot_df(
         return fig, ax
 
         
-
     # Set up mapping dictionaries
 
     if color_by is not None:
@@ -202,11 +203,3 @@ def plot_df(
 
 
     return fig, ax
-
-
-
-
-
-
-
-
