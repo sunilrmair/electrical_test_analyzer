@@ -29,10 +29,43 @@ def plot_df(
         split_yaxis_text_xy=(1.0, 0.5), split_yaxis_text_kwargs=None,
         split_xaxis_text_xy=(0.5, 1.0), split_xaxis_text_kwargs=None
     ):
+    """Plots columns from a DataFrame.
+
+    Args:
+        df (pandas.Dataframe): The dataframe containing the data to plot.
+        x_key (str): The name of the column containing the data to plot along the x axis.
+        y_key (str): The name of the column containing the data to plot along the y axis.
+        x_func (Callable[pandas.Series, Sequence, optional): A function to transform the x data. Defaults to identity function lambda x : x.
+        y_func (Callable[pandas.Series, Sequence, optional): A function to transform the y data. Defaults to identity function lambda y : y.
+        group_by (list[str], str, optional): _description_. Defaults to None.
+        color_by (str, optional): _description_. Defaults to None.
+        cmap (_type_, optional): _description_. Defaults to None.
+        linestyle_by (str, optional): _description_. Defaults to None.
+        linestyle_cycle (_type_, optional): _description_. Defaults to None.
+        marker_by (str, optional): _description_. Defaults to None.
+        marker_cycle (_type_, optional): _description_. Defaults to None.
+        label_by (str, optional): _description_. Defaults to None.
+        split_yaxis_by (str, optional): _description_. Defaults to None.
+        split_xaxis_by (str, optional): _description_. Defaults to None.
+        ax (matplotlib.axes.Axes, optional): _description_. Defaults to None.
+        subplots_kw (dict, optional): _description_. Defaults to None.
+        scale_axes (bool, optional): _description_. Defaults to True.
+        plot_kw (dict, optional): _description_. Defaults to None.
+        split_yaxis_text_xy (tuple, optional): _description_. Defaults to (1.0, 0.5).
+        split_yaxis_text_kwargs (dict, optional): _description_. Defaults to None.
+        split_xaxis_text_xy (tuple, optional): _description_. Defaults to (0.5, 1.0).
+        split_xaxis_text_kwargs (dict, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
     
 
     subplots_kw = subplots_kw or {}
     plot_kw = plot_kw or {}
+
+
+    # Add all split by elements to group by
 
     group_by = group_by or []
     group_by = ensure_iterable(group_by)
@@ -94,12 +127,13 @@ def plot_df(
         ncols = 1
 
 
+    # Create / get figure
+
     figsize = subplots_kw.get('figsize', (6.4, 4.8))
     if scale_axes:
         figsize = tuple([scale * length for scale, length in zip((ncols, nrows), figsize)])
     
     subplots_kw = {**subplots_kw, **dict(nrows=nrows, ncols=ncols, figsize=figsize)}
-
 
     if split_yaxis_by is not None and split_xaxis_by is not None:
         fig, ax = plt.subplots(**subplots_kw)
@@ -117,8 +151,12 @@ def plot_df(
             fig, ax = plt.subplots(**subplots_kw)
     
 
+    # Plot
+
     for tags, subset_df in df.groupby(group_by):
         
+        # Get appropriate ax
+
         if split_yaxis_by is not None and split_xaxis_by is not None:
             current_ax = ax[yaxes_map[tags[split_yaxis_ind]], xaxes_map[tags[split_xaxis_ind]]]
         elif split_yaxis_by is not None:
@@ -128,6 +166,8 @@ def plot_df(
         else:
             current_ax = ax
 
+
+        # Set up plot properties
 
         additional_plot_kw = {}
         if color_by is not None:
@@ -142,18 +182,23 @@ def plot_df(
         current_ax.plot(x_func(subset_df[x_key]), y_func(subset_df[y_key]), **{**plot_kw, **additional_plot_kw})
     
 
+    # Add split plot labels
+
     if split_yaxis_by is not None:
-        for val, i in yaxes_map.items():
-            index = (i,) + (ax.ndim - 1) * (-1,)
-            split_yaxis_text_kwargs_instance = split_yaxis_text_kwargs or {}
-            split_yaxis_text_kwargs_instance = {**dict(transform=ax[index].transAxes, rotation=-90, va='center', ha='left'), **split_yaxis_text_kwargs_instance}
-            ax[index].text(*split_yaxis_text_xy, val, **split_yaxis_text_kwargs_instance)
+        if split_yaxis_text_xy is not None:
+            for val, i in yaxes_map.items():
+                index = (i,) + (ax.ndim - 1) * (-1,)
+                split_yaxis_text_kwargs_instance = split_yaxis_text_kwargs or {}
+                split_yaxis_text_kwargs_instance = {**dict(transform=ax[index].transAxes, rotation=-90, va='center', ha='left'), **split_yaxis_text_kwargs_instance}
+                ax[index].text(*split_yaxis_text_xy, val, **split_yaxis_text_kwargs_instance)
+    
     if split_xaxis_by is not None:
-        for val, i in xaxes_map.items():
-            index = (ax.ndim - 1) * (0,) + (i,)
-            split_xaxis_text_kwargs_instance = split_xaxis_text_kwargs or {}
-            split_xaxis_text_kwargs_instance = {**dict(transform=ax[index].transAxes, va='bottom', ha='center'), **split_xaxis_text_kwargs_instance}
-            ax[index].text(*split_xaxis_text_xy, val, **split_xaxis_text_kwargs_instance)
+        if split_xaxis_text_xy is not None:
+            for val, i in xaxes_map.items():
+                index = (ax.ndim - 1) * (0,) + (i,)
+                split_xaxis_text_kwargs_instance = split_xaxis_text_kwargs or {}
+                split_xaxis_text_kwargs_instance = {**dict(transform=ax[index].transAxes, va='bottom', ha='center'), **split_xaxis_text_kwargs_instance}
+                ax[index].text(*split_xaxis_text_xy, val, **split_xaxis_text_kwargs_instance)
 
 
     return fig, ax
