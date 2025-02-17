@@ -8,9 +8,7 @@ Electrical Test Analyzer is a collection of modules for loading and analyzing el
 
 **Cell parameters log**: A file or files (.csv, .xlsx, etc.) containing information about cell builds. Contains one row per sample. Should at least contain columns "Sample name" and "Active area (cm2)". Other example columns include: [TODO: list]
 
-
 **Test parameters log**: Files (.csv, .xlsx, etc.) containing information about tests. Contains one row per test. Should at least contain columns "Sample name" and "File specifier". "File specifier" should contain a substring of the raw data filename such that, along with the sample name, a unique file in the data directory is specified (i.e. `sample_name is in file_name and file_specifier is in file_name` is `True` for exactly one file in the data directory). Note that "File specifier" can simply be the entire file name. Other example columns include [TODO: list].
-
 
 **Data directory**: A directory or directories containing the raw data files.
 
@@ -26,11 +24,9 @@ An example file structure is as follows:
 └──data_directory/
 ```
 
-
 ## Usage
 
 An electrical test analyzer workflow involves three major steps: loading the data, analyzing the data, and plotting or saving the data.
-
 
 ### Loading the data
 
@@ -82,18 +78,20 @@ query_df = qm.search(data_directory)
 
 In general, analyzers take in DataFrames and output DataFrames via an `analyze()` method. The following analyzers take in the query DataFrame from `QueryManager.search()` and output results as well as the cell and test parameters. Any columns with area-normalizable units (mA, mAh, W, Ohm, etc.) are copied into an area-normalized version (mA/cm2, mAh/cm2, W/cm2, Ohm-cm2, etc.): using the 'Active area (cm2)' column.
 
-RawDataLoader: Returns the raw data from each test. Note that certain standard columns are renamed.
+**RawDataLoader**: Returns the raw data from each test. Note that certain standard columns are renamed.
 
-GITTAnalyzer: Returns metrics for each pair of consecutive polarize, rest sequences in each test.
+**GITTAnalyzer**: Returns metrics for each pair of consecutive polarize, rest sequences in each test.
 
-EISLoader: Returns raw EIS data from each scan in each test.
+**EISLoader**: Returns raw EIS data from each scan in each test.
 
-EISBasicAnalyzer: Returns the minimum first-quadrant Re(Z) value along with some other metrics for each EIS scan within each test.
+**EISBasicAnalyzer**: Returns the minimum first-quadrant Re(Z) value along with some other metrics for each EIS scan within each test.
 
-MetricAnalyzer: Returns total time, capacity, and energy for each test along with energy and power density metrics. Requires the cell parameter log to contain `Cathode type`, `Cathode thickness (mm)`, `Separator type`, `Separator thickness (mm)`, `Anode type`, and `Anode thickness (mm)` columns, as well as a separate component properties log with densities for each material.
+**MetricAnalyzer**: Returns total time, capacity, and energy for each test along with energy and power density metrics. Calculated for the total test and considering only the polarization steps. Requires the cell parameter log to contain `Cathode type`, `Cathode thickness (mm)`, `Separator type`, `Separator thickness (mm)`, `Anode type`, and `Anode thickness (mm)` columns, as well as a separate component properties log with densities for each material.
 
 The following example shows the metrics calculated by the GITTAnalyzer:
 ```python
+from electrical_test_analyzer.test_analyzers import GITTAnalyzer
+
 gitt_output_df = GITTAnalyzer.analyze(query_df)
 
 print(gitt_output_df.columns)
