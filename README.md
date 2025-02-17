@@ -65,7 +65,7 @@ cell_types = ['Flow']
 celltype_filterset = FilterSet(isin_filters{'Cell type' : cell_types})
 ```
 
-The FilterSets are added and applied to the QueryManager as follows. Adding multiple FilterSets to the QueryManager will result in the union of their results.
+The FilterSets are added and applied to the QueryManager as follows. Adding multiple FilterSets to the QueryManager will yield the union of their results.
 
 ```python
 qm.add_filterset([samplename_filterset, celltype_filterset])
