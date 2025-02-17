@@ -6,9 +6,9 @@ Electrical Test Analyzer is a collection of modules for loading and analyzing el
 ## Requirements
 
 
-**Cell parameters log**: A file or files (.csv, .xlsx, etc.) containing information about cell builds. Contains one row per sample. Should at least contain columns "Sample name" and "Active area (cm2)". Other example columns include: [TODO: list]
+**Cell parameters log**: A file or files (.csv, .xlsx, etc.) containing information about cell builds. Contains one row per sample. Should at least contain columns "Sample name" and "Active area (cm2)". Other example columns include Cell type, Cathode type, Separator type, Separator thickness (mm), etc.
 
-**Test parameters log**: Files (.csv, .xlsx, etc.) containing information about tests. Contains one row per test. Should at least contain columns "Sample name" and "File specifier". "File specifier" should contain a substring of the raw data filename such that, along with the sample name, a unique file in the data directory is specified (i.e. `sample_name is in file_name and file_specifier is in file_name` is `True` for exactly one file in the data directory). Note that "File specifier" can simply be the entire file name. Other example columns include [TODO: list].
+**Test parameters log**: Files (.csv, .xlsx, etc.) containing information about tests. Contains one row per test. Should at least contain columns "Sample name" and "File specifier". "File specifier" should contain a substring of the raw data filename such that, along with the sample name, a unique file in the data directory is specified (i.e. `sample_name is in file_name and file_specifier is in file_name` is `True` for exactly one file in the data directory). Note that "File specifier" can simply be the entire file name. Other example columns include Cell temperature (C), Bubbler type, Bubbler temperature (C), Gas type, etc.
 
 **Data directory**: A directory or directories containing the raw data files.
 
@@ -33,7 +33,7 @@ An electrical test analyzer workflow involves three major steps: loading the dat
 Data is queried using QueryManager and FilterSet objects. The QueryManager is initialized with cell parameter and test parameter filepaths. Upon initialization, all tests in the test parameter files are selected. At any point, the number of selected tests can be checked with `QueryManager.num_tests`
 
 ```python
-from electrical_test_analyzer.query_manager import QueryManager
+from electrical_test_analyzer import QueryManager
 
 qm = QueryManager(cell_parameters_filepath, test_parameters_filepath)
 
@@ -44,11 +44,19 @@ print(f'{qm.num_tests} tests selected')
 
 The data can then be filtered by any column in the cell and test parameters using the FilterSet objects. A FilterSet is composed of a combination of the following filters, which will be applied in conjunction.
 
-[TODO: list filter types]
+| Filter Type          | Expected Format                        | Example Usage                                     |
+|----------------------|----------------------------------------|---------------------------------------------------|
+| `query_filters`      | `list` of strings (pandas `.query()`)  | `["Cell temperature (C) > 110", "Bubbler temperature (C) < 85"]`|
+| `isin_filters`       | `dict` where keys are column names, values are lists of allowed values | `{"Sample name": ["NCC001AB-EC00-01", "NHC000AK-EC00-01"]}`|
+| `notin_filters`      | `dict` where keys are column names, values are lists of disallowed values | `{"Cell type": ["Flow"]}`|
+| `between_filters`    | `dict` where keys are column names, values are `(low, high)` tuples | `{"Active area (cm2)": (0.5, 1.0)}`|
+| `lambda_filters`     | `list` of functions returning boolean masks | `[lambda df: df["Bubbler temperature (C)"] % 2 == 0]`|
+| `null_check_filters` | `dict` where keys are column names, values are `True` (keep nulls) or `False` (drop nulls) | `{"Active area (cm2)": False}`|
+
 
 The following FilterSets will keep sample NCC001AB-EC00-01 and all flow cells:
 ```python
-from electrical_test_analyzer.dataframe_operations import FilterSet
+from electrical_test_analyzer import FilterSet
 
 sample_names = ['NCC001AB-EC00-01']
 samplename_filterset = FilterSet(isin_filters={'Sample name' : sample_names})
@@ -90,7 +98,7 @@ In general, analyzers take in DataFrames and output DataFrames via an `analyze()
 
 The following example shows the metrics calculated by the GITTAnalyzer:
 ```python
-from electrical_test_analyzer.test_analyzers import GITTAnalyzer
+from electrical_test_analyzer import GITTAnalyzer
 
 gitt_output_df = GITTAnalyzer.analyze(query_df)
 
