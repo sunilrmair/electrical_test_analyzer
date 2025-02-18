@@ -26,7 +26,7 @@ An example file structure is as follows:
 
 ## Usage
 
-An electrical test analyzer workflow involves three major steps: loading the data, analyzing the data, and plotting or saving the data.
+An electrical test analyzer workflow involves three major steps: loading the data, analyzing the data, and saving or plotting the data.
 
 ### Loading the data
 
@@ -134,4 +134,33 @@ Index(['Sample name', 'File specifier', 'Cell temperature (C)', 'Bubbler type',
 
 ### Plotting/saving the data
 
-Plotly Express provides functions for plotting directly from pandas DataFrames. Electrical Test Analyzer provides a basic version in `plot_df`. Pandas provides methods for writing DataFrames to disk.
+Pandas provides methods for writing DataFrames to disk. Plotly Express provides functions for plotting directly from pandas DataFrames. Electrical Test Analyzer provides a basic plotting functionality build on top of matplotlib in `plot_df`, which takes a dataframe, a column name for x data, a column name for y data, and the following optional parameters (see documentation for all possible parameters):
+
+- `x_func`, `y_func`: Functions to modify the x and y data, for example `x_func=lambda x : -x` to negate the x data.
+- `group_by`: Column by which to split the data into separate traces; `group_by='filepath'` with split the data by the source test file.
+- `color_by`, `linestyle_by`, `marker_by`, `label_by`: Column by which to determine color, linestyle, marker style, or label.
+- `split_yaxis_by`, `split_xaxis_by`: Column by which to create and populate subplots along the y or x axis.
+
+```python
+from electrical_test_analyzer import plot_df
+
+# Apply MetricAnalyzer
+specific_capacity = 1165.8 # mAh/g
+metric_output_df = MetricAnalyzer.analyze(query_df, specific_capacity, component_properties_manifest_filepath)
+
+# Plot results
+plot_kw = dict(marker='o')
+
+x_key = 'Sample name'
+y_key = 'Polarize only average power density system basis (W/kg)'
+
+fig, ax = plot_df(metric_output_df, x_key, y_key, group_by='filepath', color_by='Cell type', plot_kw=plot_kw)
+
+
+ax.tick_params(axis='x', labelrotation=90)
+ax.set_xlabel(x_key)
+ax.set_ylabel(y_key)
+
+plt.show()
+```
+![Example figure](examples/figures/metric_analyzer_result.svg)
