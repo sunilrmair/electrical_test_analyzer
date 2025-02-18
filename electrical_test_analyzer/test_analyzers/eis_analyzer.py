@@ -27,7 +27,7 @@ class EISBasicAnalyzer(FileAnalyzer):
 
         t, c, freq, re_z, minus_im_z = eis_df[['Time (s)', 'Capacity (mAh)', 'Frequency (Hz)', 'Re Z (Ohm)', '-Im Z (Ohm)']].to_numpy().T
 
-        start_time = t[0]
+        start_time = t[0] / 3600
         start_cap = c[0]
         re_z, minus_im_z = clip_to_first_quadrant(re_z, minus_im_z)
         r0 = np.min(re_z)
