@@ -164,3 +164,5 @@ ax.set_ylabel(y_key)
 plt.show()
 ```
 ![Example figure](examples/figures/metric_analyzer_result.svg)
+
+Other example analyses can be found in the `examples/eta_example.ipynb` notebook.
