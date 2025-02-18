@@ -71,7 +71,7 @@ def plot_df(
 
     group_by = group_by or []
     group_by = ensure_iterable(group_by)
-    group_by.extend([x for x in [color_by, linestyle_by, marker_by, split_yaxis_by, split_xaxis_by] if x is not None and x not in group_by])
+    group_by.extend([x for x in [color_by, linestyle_by, marker_by, label_by, split_yaxis_by, split_xaxis_by] if x is not None and x not in group_by])
 
     if not group_by:
         if ax is not None:
