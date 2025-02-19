@@ -117,7 +117,7 @@ def plot_df(
         
 
 
-        if hasattr(cmap, 'colors'):
+        if isinstance(cmap, mcolors.ListedColormap):
             color_list = cmap.colors
             color_map = create_mapping(unique_color_values, color_list)
         else:
