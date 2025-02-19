@@ -53,11 +53,17 @@ The data can then be filtered by any column in the cell and test parameters usin
 | `lambda_filters`     | `list` of functions returning boolean masks | `[lambda df: df["Bubbler temperature (C)"] % 2 == 0]`|
 | `null_check_filters` | `dict` where keys are column names, values are `True` (keep nulls) or `False` (drop nulls) | `{"Active area (cm2)": False}`|
 
-
-The following FilterSets will keep sample NCC001AB-EC00-01 and all flow cells:
+The following FilterSet will keep all tray cells that were cycled with air:
 ```python
 from electrical_test_analyzer import FilterSet
 
+cell_type = ['Tray']
+gas_type = ['Air']
+
+cell_and_gas_filterset = FilterSet(isin_filters={'Cell type' : cell_type, 'Gas type' : gas_type})
+```
+The following FilterSets will keep sample NCC001AB-EC00-01 and all flow cells:
+```python
 sample_names = ['NCC001AB-EC00-01']
 samplename_filterset = FilterSet(isin_filters={'Sample name' : sample_names})
 
