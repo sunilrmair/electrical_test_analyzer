@@ -89,14 +89,45 @@ def plot_df(
     if color_by is not None:
         color_ind = group_by.index(color_by)
         unique_color_values = df[color_by].unique()
-        if cmap is None:
+
+        # Set up colormap
+        
+        if isinstance(cmap, mcolors.Colormap):
+            pass
+        elif isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+        elif isinstance(cmap, list):
+            cmap = mcolors.ListedColormap(cmap)
+        else:
+            if np.issubdtype(df[color_by].dtype, np.number):
+                cmap = plt.get_cmap(default_continuous_cmap)
+            else:
+                cmap = plt.get_cmap(default_categorical_cmap)
+
+
+
+        # if cmap is None:
+        #     if np.issubdtype(df[color_by].dtype, np.number):
+        #         norm = mcolors.Normalize(vmin=unique_color_values.min(), vmax=unique_color_values.max())
+        #         cmap_obj = plt.get_cmap(default_continuous_cmap)
+        #         color_map = create_mapping(unique_color_values, [cmap_obj(norm(color_value)) for color_value in unique_color_values])
+        #     else:
+        #         color_list = plt.get_cmap(default_categorical_cmap).colors
+        #         color_map = create_mapping(unique_color_values, color_list)
+        
+
+
+        if hasattr(cmap, 'colors'):
+            color_list = cmap.colors
+            color_map = create_mapping(unique_color_values, color_list)
+        else:
             if np.issubdtype(df[color_by].dtype, np.number):
                 norm = mcolors.Normalize(vmin=unique_color_values.min(), vmax=unique_color_values.max())
-                cmap_obj = plt.get_cmap(default_continuous_cmap)
-                color_map = create_mapping(unique_color_values, [cmap_obj(norm(color_value)) for color_value in unique_color_values])
+                color_map = create_mapping(unique_color_values, [cmap(norm(color_value)) for color_value in unique_color_values])
             else:
-                color_list = plt.get_cmap(default_categorical_cmap).colors
+                color_list = cmap(np.linspace(0, 1, len(unique_color_values)))
                 color_map = create_mapping(unique_color_values, color_list)
+        
 
     if linestyle_by is not None:
         linestyle_ind = group_by.index(linestyle_by)
