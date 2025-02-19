@@ -91,7 +91,7 @@ def plot_df(
         unique_color_values = df[color_by].unique()
 
         # Set up colormap
-        
+
         if isinstance(cmap, mcolors.Colormap):
             pass
         elif isinstance(cmap, str):
@@ -125,7 +125,11 @@ def plot_df(
                 norm = mcolors.Normalize(vmin=unique_color_values.min(), vmax=unique_color_values.max())
                 color_map = create_mapping(unique_color_values, [cmap(norm(color_value)) for color_value in unique_color_values])
             else:
+                print(f'{unique_color_values=}')
+                print(f'{len(unique_color_values)=}')
+                print(f'{np.linspace(0, 1, len(unique_color_values))=}')
                 color_list = cmap(np.linspace(0, 1, len(unique_color_values)))
+                print(f'{color_list=}')
                 color_map = create_mapping(unique_color_values, color_list)
         
 
