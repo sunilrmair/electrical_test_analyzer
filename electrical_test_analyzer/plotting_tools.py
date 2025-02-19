@@ -103,17 +103,6 @@ def plot_df(
                 cmap = plt.get_cmap(default_continuous_cmap)
             else:
                 cmap = plt.get_cmap(default_categorical_cmap)
-
-
-
-        # if cmap is None:
-        #     if np.issubdtype(df[color_by].dtype, np.number):
-        #         norm = mcolors.Normalize(vmin=unique_color_values.min(), vmax=unique_color_values.max())
-        #         cmap_obj = plt.get_cmap(default_continuous_cmap)
-        #         color_map = create_mapping(unique_color_values, [cmap_obj(norm(color_value)) for color_value in unique_color_values])
-        #     else:
-        #         color_list = plt.get_cmap(default_categorical_cmap).colors
-        #         color_map = create_mapping(unique_color_values, color_list)
         
 
 
@@ -125,11 +114,7 @@ def plot_df(
                 norm = mcolors.Normalize(vmin=unique_color_values.min(), vmax=unique_color_values.max())
                 color_map = create_mapping(unique_color_values, [cmap(norm(color_value)) for color_value in unique_color_values])
             else:
-                print(f'{unique_color_values=}')
-                print(f'{len(unique_color_values)=}')
-                print(f'{np.linspace(0, 1, len(unique_color_values))=}')
                 color_list = cmap(np.linspace(0, 1, len(unique_color_values)))
-                print(f'{color_list=}')
                 color_map = create_mapping(unique_color_values, color_list)
         
 
