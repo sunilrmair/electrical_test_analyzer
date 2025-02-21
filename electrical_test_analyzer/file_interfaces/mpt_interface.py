@@ -133,6 +133,11 @@ class MPTInterface(SimpleFileInterface):
 
     @classmethod
     def filepath_to_standard_data_df(cls, filepath, usecols=None, zerocols='all', **kwargs):
+
+        required_cols = ['mode']
+        if usecols is not None:
+            usecols.extend([col for col in required_cols if col not in usecols])
+            
         standard_data_df = super().filepath_to_standard_data_df(filepath, usecols=usecols, zerocols=zerocols, **kwargs)
 
         # If frequency data is included, use to refine classification of mode

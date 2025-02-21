@@ -89,11 +89,8 @@ class SimpleFileInterface(FileInterface):
         inverse_column_keyword_map = {v : k for k, v in column_keyword_map.items()}
         operations_map = cls.column_operations_map()
 
-        required_cols = ['mode', 'Frequency (Hz)']
-
         # Convert usecols to raw names
         if usecols is not None:
-            usecols.extend([col for col in required_cols if col not in usecols])
             usecols_raw = [column_keyword_map[column] if column in column_keyword_map else column for column in usecols]
         else:
             usecols_raw = None
