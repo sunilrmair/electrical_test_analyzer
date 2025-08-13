@@ -146,6 +146,7 @@ def naive_df_area_normalization(df, active_area='Active area (cm2)', **kwargs):
         'mAh',
         'mA',
         'mW',
+        'W',
         'mWh',
         'Wh',
         'F'

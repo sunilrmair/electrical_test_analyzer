@@ -85,8 +85,9 @@ class MPTInterface(SimpleFileInterface):
             'Capacity (mAh)' : 'Capacity/mA.h',
             'Voltage (V)' : 'Ewe/V',
             'Current (mA)' : 'I/mA',
+            'Power (W)' : 'P/W',
             'Average Current (mA)' : '<I>/mA',
-            'Energy (Wh)' : 'Energy we discharge/W.h',
+            'Energy (Wh)' : '|Energy|/W.h',
             'Re Z (Ohm)' : 'Re(Z)/Ohm',
             '-Im Z (Ohm)' : '-Im(Z)/Ohm',
             'Frequency (Hz)' : 'freq/Hz'
