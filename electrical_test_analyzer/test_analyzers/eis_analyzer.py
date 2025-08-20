@@ -74,6 +74,9 @@ class EISLoader(FileAnalyzer):
     def eis_step_to_table(cls, scan_count, eis_df, pretreat_func=None, **kwargs):
         pretreat_func = pretreat_func or clip_to_first_quadrant
 
+        if 'Capacity (mAh)' not in eis_df.columns:
+            eis_df['Capacity (mAh)'] = np.nan
+
         t, c, freq, re_z, minus_im_z = eis_df[['Time (s)', 'Capacity (mAh)', 'Frequency (Hz)', 'Re Z (Ohm)', '-Im Z (Ohm)']].to_numpy().T
         re_z, minus_im_z, freq, t, c = pretreat_func(re_z, minus_im_z, freq, t, c)
         summary_table = np.stack((np.full(freq.shape, scan_count), t, c, freq, re_z, minus_im_z), axis=1)
@@ -87,7 +90,13 @@ class EISLoader(FileAnalyzer):
         raw_data_df = interface.filepath_to_standard_data_df(filepath, **kwargs)
         
         nested_eis_steps = df_to_column_value_sequences(raw_data_df, 'MODE', ['EIS'])
-        eis_steps = [x[0] for x in nested_eis_steps]
+        eis_steps = []
+        for x in nested_eis_steps:
+            if 'cycle number' in x[0].columns:
+                eis_steps.extend([df for _, df in x[0].groupby('cycle number')])
+            else:
+                eis_steps.append(x[0])
+        # eis_steps = [x[0] for x in nested_eis_steps]
 
         results_content = np.concatenate([cls.eis_step_to_table(scan_count, eis_df, **kwargs) for scan_count, eis_df in enumerate(eis_steps)])
         results_df = pd.DataFrame(results_content, columns=cls.headers)

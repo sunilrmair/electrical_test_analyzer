@@ -142,10 +142,23 @@ class MPTInterface(SimpleFileInterface):
         standard_data_df = super().filepath_to_standard_data_df(filepath, usecols=usecols, zerocols=zerocols, **kwargs)
 
         # If frequency data is included, use to refine classification of mode
-        if 'Frequency (Hz)' in standard_data_df.columns:
-            standard_data_df['MODE'] = np.where(standard_data_df['Frequency (Hz)'] != 0, 'EIS', standard_data_df['mode'].map(cls.mode_dict))
+        # if 'Frequency (Hz)' in standard_data_df.columns:
+        #     standard_data_df['MODE'] = np.where(standard_data_df['Frequency (Hz)'] != 0, 'EIS', standard_data_df['mode'].map(cls.mode_dict))
+        # else:
+        #     standard_data_df['MODE'] = standard_data_df['mode'].map(cls.mode_dict)
+
+
+        if 'mode' in standard_data_df.columns:
+            if 'Frequency (Hz)' in standard_data_df.columns:
+                standard_data_df['MODE'] = np.where(standard_data_df['Frequency (Hz)'] != 0, 'EIS', standard_data_df['mode'].map(cls.mode_dict))
+            else:
+                standard_data_df['MODE'] = standard_data_df['mode'].map(cls.mode_dict) # just mode
         else:
-            standard_data_df['MODE'] = standard_data_df['mode'].map(cls.mode_dict)
+            if 'Frequency (Hz)' in standard_data_df.columns:
+                standard_data_df['MODE'] = np.where(standard_data_df['Frequency (Hz)'] != 0, 'EIS', 'UNKNOWN')
+            else:
+                standard_data_df['MODE'] = 'UNKNOWN'
+        
         return standard_data_df
 
 

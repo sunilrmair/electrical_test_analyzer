@@ -68,7 +68,8 @@ def df_to_column_value_sequences(df, column, sequence):
     dfs_grouped_by_consecutive_column_values = df.groupby((df[column] != df[column].shift(1)).cumsum() - 1)
     column_group_values = np.array([group_df[column].iloc[0] for _, group_df in dfs_grouped_by_consecutive_column_values])
 
-    consecutive_group_values = np.stack([column_group_values[i:-sequence_length+i] for i in range(sequence_length)], axis=-1)
+    # consecutive_group_values = np.stack([column_group_values[i:-sequence_length+i] for i in range(sequence_length)], axis=-1)
+    consecutive_group_values = np.stack([column_group_values[i:len(column_group_values)-sequence_length+i+1] for i in range(sequence_length)], axis=-1)
     match_mask = np.pad(np.all(consecutive_group_values == sequence, axis=-1), (0, sequence_length), constant_values=False)
 
     matched_df_sequences = [[dfs_grouped_by_consecutive_column_values.get_group(j) for j in range(i, i + sequence_length)] for i in range(match_mask.size) if match_mask[i]]
