@@ -79,7 +79,7 @@ def df_to_column_value_sequences(df, column, sequence):
 
 
 
-def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, **kwargs):
+def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, interval=None, **kwargs):
     """Concatenates a list of DataFrames while adjusting specified columns to continue smoothly.
 
     Args:
@@ -91,6 +91,7 @@ def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, **kwar
     """
 
     continuing_columns = continuing_columns or []
+    interval = interval or {}
     default_kwargs = dict(ignore_index=True)
     kwargs = {**default_kwargs, **kwargs}
 
@@ -109,7 +110,9 @@ def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, **kwar
                 cumulative_column_values[column][i + 1] = cumulative_column_values[column][i] + df[column].iloc[-1]
             else:
                 cumulative_column_values[column][i + 1] = cumulative_column_values[column][i]
-    
+            # Add interval
+            if column in interval:
+                cumulative_column_values[column][i + 1] += interval[column]
 
     # Add cumulative values
     for i, df in enumerate(dfs):
@@ -117,7 +120,6 @@ def concatenate_dfs_with_continuing_columns(dfs, continuing_columns=None, **kwar
             if column in df.columns:
                 df[column] += cumulative_column_values[column][i]
     
-
     # Concatenate
     concatenated_dfs = pd.concat(dfs, **kwargs)
 

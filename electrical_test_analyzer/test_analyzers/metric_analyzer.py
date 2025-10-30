@@ -116,24 +116,6 @@ class MetricAnalyzer(FileAnalyzer):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##################################################################################################        
-# Work in progress
-##################################################################################################
-
 class EnergyPowerAnalyzer(TestAnalyzer):
 
     @classmethod
@@ -157,8 +139,12 @@ class EnergyPowerAnalyzer(TestAnalyzer):
         for target in ensure_iterable(target_specific_energy):
             target_satisfied_idx = (subset_df['Chemistry specific energy (Wh/kg)'] >= target).idxmax()
             if subset_df['Chemistry specific energy (Wh/kg)'].loc[target_satisfied_idx] < target:
+                subset_df[f'Chemistry areal mass at {target:0.0f} Wh/kg (g/cm2)'] = np.nan
                 subset_df[f'Power at {target:0.0f} Wh/kg (W/kg)'] = np.nan
             else:
+                subset_df[f'Chemistry areal mass at {target:0.0f} Wh/kg (g/cm2)'] = subset_df['Chemistry areal mass (g/cm2)'].loc[target_satisfied_idx]
+                subset_df.loc[target_satisfied_idx + 1:, f'Chemistry areal mass at {target:0.0f} Wh/kg (g/cm2)'] = np.nan
+                
                 subset_df[f'Power at {target:0.0f} Wh/kg (W/kg)'] = 1000 * subset_df['Power (W/cm2)'] / (subset_df['Inactive component areal density (g/cm2)'] + subset_df['Mass of consumed active (g/cm2)'].loc[target_satisfied_idx])
                 subset_df.loc[target_satisfied_idx + 1:, f'Power at {target:0.0f} Wh/kg (W/kg)'] = np.nan
 
@@ -174,51 +160,3 @@ class EnergyPowerAnalyzer(TestAnalyzer):
 
         output_df = super().analyze(input_df, component_properties_df=component_properties_df, concat_kwargs=concat_kwargs, **kwargs)
         return output_df
-
-# class EnergyPowerAnalyzer(TestAnalyzer):
-    
-
-#     headers = ['Total time (h)', 'Total capacity (mAh)', 'Total energy (Wh)']
-
-#     @classmethod
-#     def split_df(cls, input_df, component_properties_df=None, **kwargs):
-#         input_df = add_inactive_areal_density(input_df, component_properties_df)
-#         return [row for _, row in input_df.iterrows()]
-    
-#     @classmethod
-#     def analyze_subset_df(cls, row, required_energy_density=None, polarize_only=False, **kwargs):
-
-#         filepath = row['filepath']
-#         active_area = row['Active area (cm2)']
-
-#         _, ext = os.path.splitext(filepath)
-#         interface = interface or file_interface_extension_map[ext]
-#         raw_data_df = interface.filepath_to_standard_data_df(filepath, usecols=['Time (s)', 'Capacity (mAh)', 'Energy (Wh)', 'Current (mA)', 'Voltage (V)'], **kwargs)
-#         if polarize_only:
-#             raw_data_df = concatenate_dfs_with_continuing_columns([polarize_step_container[0].copy() for polarize_step_container in df_to_column_value_sequences(raw_data_df, 'MODE', ['POLARIZE'])], continuing_columns=['Time (s)', 'Capacity (mAh)', 'Energy (Wh)'], ignore_index=True)
-
-#         time, capacity, energy, current, voltage = raw_data_df[['Time (s)', 'Capacity (mAh)', 'Energy (Wh)', 'Current (mA)', 'Voltage (V)']].to_numpy().T
-#         power = voltage * current
-
-#         #######################################
-
-#         summary_line = np.array([np.max(raw_data_df[key]) - np.min(raw_data_df[key]) for key in ['Time (s)', 'Capacity (mAh)', 'Energy (Wh)']])
-#         summary_line[0] /= 3600
-
-#         results_df = pd.DataFrame([summary_line], columns=cls.headers)
-
-#         return results_df
-#         # issue with longest horizontal line segment idea is that it doesn't account for mass of sodium
-#         # try binary search on sorted y values lol
-
-    
-#     @classmethod
-#     def analyze(cls, input_df, concat_kwargs=None, **kwargs):
-#         output_df = super().analyze(input_df, concat_kwargs=concat_kwargs, **kwargs)
-#         output_df = naive_df_area_normalization(output_df)
-#         return output_df
-
-
-
-
-
